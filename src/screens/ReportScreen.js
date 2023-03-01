@@ -1,8 +1,9 @@
 import { Component } from "react";
 import { SafeAreaView } from "react-native";
-import { View, Pressable, Text, ScrollView, FlatList } from "react-native-web";
+import { View, Pressable, Text, ScrollView, FlatList } from "react-native";
 
 import styles from '../styles/MainStyle';
+import Header from "../constants/Header";
 
 class ReportScreen extends Component {
     constructor(){
@@ -68,12 +69,8 @@ class ReportScreen extends Component {
         if (this.state.selectedTab == 'current') {
             return(
                 <SafeAreaView style={styles.container}>
+                    <Header navigation={this.props.navigation}></Header>
                     <View style={styles.btnGroupContainer}>
-                            <Pressable 
-                                style={styles.btnMedium}  
-                            >
-                                <Text style={styles.btnText}>Back</Text>
-                            </Pressable>
                             <Pressable 
                                 style={styles.btnMedium}
                                 onPress={() => this.getCurrentOrders()}    
@@ -103,11 +100,6 @@ class ReportScreen extends Component {
             return(
                 <SafeAreaView style={styles.container}>
                     <View style={styles.btnGroupContainer}>
-                            <Pressable 
-                                style={styles.btnMedium}  
-                            >
-                                <Text style={styles.btnText}>Back</Text>
-                            </Pressable>
                             <Pressable 
                                 style={styles.btnMedium}
                                 onPress={() => this.getCurrentOrders()}    

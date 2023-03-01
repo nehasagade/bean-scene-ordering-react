@@ -1,11 +1,12 @@
 import { Component } from "react";
 import { SafeAreaView } from "react-native";
-import { View, Pressable, ScrollView, FlatList, Text, TextInput, Picker } from "react-native-web";
+import { View, Pressable, ScrollView, FlatList, Text, TextInput, Picker } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 import styles from '../styles/MainStyle';
 import Colours from "../constants/Colours";
+import Header from "../constants/Header";
 
 class CategoryScreen extends Component {
     constructor(){
@@ -44,6 +45,7 @@ class CategoryScreen extends Component {
             this.getCategory()
             this.setState({
                 selectedTab: 'detail',
+                message: 'Successfully added'
             })
         })
     }
@@ -93,15 +95,32 @@ class CategoryScreen extends Component {
             }
         }
         fetch(url, options)
-       .then((json)=>{
+        .then((response) => {
+            if(response.ok)
+            {
+                return response.json()
+            }
+            else {
+                this.setState({
+                    message: 'Something went wrong. Try again later'
+                })
+                    
+            }
+        })
+        .then((json) => {
             console.log(json);
             this.getCategory()
+            this.setState({
+                data: json,
+                selectedTab: 'get',
+                message: 'Delete successful'
+            })
         })
     }
 
     // Edit a category item
     editCategory() {
-        var url = 'http://localhost:57431/api/Category/Edit/' + this.state._id
+        var url = 'http://localhost:57431/api/Category/Edit/' + this.state.id
         const category = {
             _id: this.state.id,
             name: this.state.name,
@@ -116,19 +135,31 @@ class CategoryScreen extends Component {
             }
         }
        fetch(url, options)
-       .then((json)=>{
+        .then((response) => {
+            if(response.ok)
+            {
+                return response.json()
+            }
+            else {
+                this.setState({
+                    message: 'Something went wrong. Try again later'
+                })
+                    
+            }
+        })
+        .then((json) => {
             console.log(json);
-            this.getCategory();
+            this.getCategory()
             this.setState({
-                message: 'Category updated'
+                data: json,
+                selectedTab: 'get',
+                message: 'Edit successful'
             })
-            
-            
         })
     }
     
     render() {
-        // Show all menu items
+        // Show all categories
         if (this.state.selectedTab == 'get') {
             const renderData=({item})=>{
                 return(
@@ -149,7 +180,7 @@ class CategoryScreen extends Component {
             }
             return(
                 <SafeAreaView style={styles.container}>                     
-                    
+                    <Header navigation={this.props.navigation}></Header>
                     <View style={styles.btnLargeContainer}>
                         <Pressable 
                             style={styles.btnLarge}
@@ -174,7 +205,7 @@ class CategoryScreen extends Component {
                 </SafeAreaView>
             );
         }
-        // View one menu item
+        // View one Category item
         else if(this.state.selectedTab == 'detail')
         {
             return(

@@ -1,13 +1,15 @@
 import { Component } from "react";
 import { SafeAreaView } from "react-native";
-import { View, Pressable, Text } from "react-native-web";
+import { View, Pressable, Text } from "react-native";
 
 import styles from '../styles/MainStyle';
+import Header from "../constants/Header";
 
 class ManagerHomeScreen extends Component {
     render() {
         return(
             <SafeAreaView style={styles.container}>
+                <Header navigation={this.props.navigation}></Header>
                 <View style={styles.btnLargeContainer}>
                     <Pressable 
                         style={styles.btnLarge}

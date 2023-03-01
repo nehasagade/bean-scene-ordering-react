@@ -1,11 +1,12 @@
 import { Component } from "react";
 import { SafeAreaView } from "react-native";
-import { View, Pressable, ScrollView, FlatList, Text, TextInput, Picker } from "react-native-web";
+import { View, Pressable, ScrollView, FlatList, Text, TextInput, Picker } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 import styles from '../styles/MainStyle';
 import Colours from "../constants/Colours";
+import Header from "../constants/Header";
 
 class MenuScreen extends Component {
     constructor(){
@@ -39,6 +40,7 @@ class MenuScreen extends Component {
             })
         }
     }
+
     // Get categories for pickers
     getCategory() {
         var options = {
@@ -146,7 +148,6 @@ class MenuScreen extends Component {
     editMenu() {
         var url = 'http://localhost:57431/api/Menu/Edit/' + this.state._id
         const staff = {
-            menu_id: this.state._id,
             name: this.state.name,
             price: this.state.price,
             description: this.state.description,
@@ -196,7 +197,7 @@ class MenuScreen extends Component {
     }
 
     searchCategory=(category)=>{
-        var url = 'http://localhost:57431/api/Menu/SearchCategory/' + category
+        var url = 'http://localhost:57431/api/Menu/SearchCategory/' + category._id
         var options = {
             method: 'GET',
             headers: {
@@ -217,12 +218,24 @@ class MenuScreen extends Component {
     }
 
     render() {
-        let categoryPicker = this.state.allCategories.map( (category) =>{
-            return <Picker.Item key={category._id} value={category.name} label={category.name} />
+        let categoryPicker = this.state.allCategories.map((category) =>{
+            return <Picker.Item key={category._id} value={category._id} label={category.name} />
         })
+        let categorySearchBtns = this.state.allCategories.map((category) => {
+            return <Pressable
+                        key={category._id} 
+                        style={styles.categorySearchBtn}
+                        onPress={() => this.searchCategory(category)}
+                    >
+            <Text style={styles.categorySearchBtnText}>{category.name}</Text>
+        </Pressable>
+        })
+        
+
         // Show all menu items
         if (this.state.selectedTab == 'get') {
             const renderData=({item})=>{
+                let categoryName = this.state.allCategories.find(obj => obj._id === item.category)
                 return(
                     <Pressable 
                         onPress={() => this.setState({
@@ -233,7 +246,7 @@ class MenuScreen extends Component {
                             price: item.price,
                             dietaryFlag: item.dietaryFlag,
                             availability: item.availability,
-                            category: item.category
+                            category: categoryName.name
                         })}
                     >
                         <View style={styles.listContainerMenu}>
@@ -241,13 +254,14 @@ class MenuScreen extends Component {
                             <Text style={styles.listText}>{item.description}</Text>
                             <Text style={styles.listText}>${item.price}</Text>
                             <Text style={styles.listText}>{item.dietaryFlag}</Text>
-                            <Text style={styles.listText}>{item.availability}</Text>
+                            <Text style={styles.listText}>{item.availability == true ? "Available" : "Unavailable"}</Text>
                         </View>
                     </Pressable>
                 )
             }
             return(
                 <SafeAreaView style={styles.container}>
+                    <Header navigation={this.props.navigation}></Header>
                     <View style={styles.searchContainer}>
                         <TextInput
                             placeholder='Search'
@@ -256,68 +270,37 @@ class MenuScreen extends Component {
                             style={styles.inputTextbox} 
                             onChangeText={text => this.search(text)} 
                         />
-                        <ScrollView 
-                            horizontal={true} 
-                            showsHorizontalScrollIndicator={false} 
-                        >
-                            <Pressable 
-                                style={styles.categorySearchBtn}
-                                onPress={() => this.searchCategory('entree')}
+                        {this.state.position == 'Manager' ?                          <Pressable 
+                                style={styles.btnSmallSearch}
+                                onPress={() => this.setState({
+                                    selectedTab: 'add',
+                                    _id: 0,
+                                    name: '',
+                                    price: 0,
+                                    description: '',
+                                    availability: true,
+                                    category: '',
+                                    dietaryFlag: ''
+                                })}    
                             >
-                                <Text style={styles.categorySearchBtnText}>Entrees</Text>
-                            </Pressable>
-                            <Pressable 
-                                style={styles.categorySearchBtn}
-                                onPress={() => this.searchCategory('main')}
-                            >
-                                <Text style={styles.categorySearchBtnText}>Mains</Text>
-                            </Pressable>
-                            <Pressable 
-                                style={styles.categorySearchBtn}
-                                onPress={() => this.searchCategory('side')}
-                            >
-                                <Text style={styles.categorySearchBtnText}>Sides</Text>
-                            </Pressable>
-                            <Pressable 
-                                style={styles.categorySearchBtn}
-                                onPress={() => this.searchCategory('beverage')}
-                            >
-                                <Text style={styles.categorySearchBtnText}>Beverages</Text>
-                            </Pressable>
-                            <Pressable 
-                                style={styles.categorySearchBtn}
-                                onPress={() => this.searchCategory('dessert')}
-                            >
-                                <Text style={styles.categorySearchBtnText}>Desserts</Text>
-                            </Pressable>
-                            <Pressable 
-                                style={styles.categorySearchBtn}
-                                onPress={() => this.getMenu()}
-                            >
-                                <Text style={styles.categorySearchBtnText}>All</Text>
-                            </Pressable>
-                        </ScrollView>
+                                <Text style={styles.btnText}>Add</Text>
+                            </Pressable> : null}
                     </View>
-                    
-                    {this.state.position == 'Manager' ? <View style={styles.btnLargeContainer}>
-                        <Pressable 
-                            style={styles.btnLarge}
-                            onPress={() => this.setState({
-                                selectedTab: 'add',
-                                _id: 0,
-                                name: '',
-                                price: 0,
-                                description: '',
-                                availability: '',
-                                category: '',
-                                dietaryFlag: ''
-                            })}    
-                        >
-                            <Text style={styles.btnText}>Add</Text>
-                        </Pressable>                    
-                    </View> : null}                
-                       
-                                    
+                    <View style={styles.searchContainer}>
+                        <ScrollView 
+                                horizontal={true} 
+                                showsHorizontalScrollIndicator={false} 
+                            >
+                                <Pressable 
+                                    style={styles.categorySearchBtn}
+                                    onPress={() => this.getMenu()}
+                                >
+                                    <Text style={styles.categorySearchBtnText}>All</Text>
+                                </Pressable>
+                                {categorySearchBtns}
+                        </ScrollView>    
+                    </View>
+                                
                     <FlatList 
                         data={this.state.data} 
                         renderItem={renderData} 
@@ -329,13 +312,15 @@ class MenuScreen extends Component {
         // View one menu item
         else if(this.state.selectedTab == 'detail')
         {
+            let categoryId = this.state.allCategories.find(obj => obj.name === this.state.category)
             return(
                 <SafeAreaView style={styles.container}>
                     <View style={styles.btnGroupContainer}>
                         <Pressable 
                             style={styles.btnMedium}
                             onPress={() => this.setState({
-                                selectedTab: 'get'
+                                selectedTab: 'get',
+                               
                             })}    
                         >
                             <Text style={styles.btnText}>Back</Text>
@@ -343,13 +328,14 @@ class MenuScreen extends Component {
                         <Pressable 
                             style={styles.btnMedium}
                             onPress={() => this.setState({
-                                selectedTab: 'edit'
+                                selectedTab: 'edit',
+                                category: categoryId._id
                             })}    
                         >
                             <Text style={styles.btnText}>Edit</Text>
                         </Pressable>
                         <Pressable 
-                            style={styles.btnMedium}
+                            style={styles.btnMediumDanger}
                             onPress={() => this.deleteMenu()}    
                         >
                             <Text style={styles.btnText}>Delete</Text>
@@ -397,7 +383,7 @@ class MenuScreen extends Component {
                             <Text style={styles.formLabel}>Status</Text>
                             <TextInput
                                 placeholder='Availablity'
-                                value={this.state.availability}
+                                value={this.state.availability == true ? "Available" : "Unavailable"}
                                 placeholderTextColor={Colours.beanDarkBlue}
                                 style={styles.inputTextbox}  
                             />
@@ -449,17 +435,11 @@ class MenuScreen extends Component {
                             <Text style={styles.formLabel}>Category</Text>
                             <Picker
                                 selectedValue = {this.state.category}
-                                onValueChange = {(value) => {this.setState({category: value})
-                                    
-                            }}
+                                onValueChange = {(value) => {this.setState({category: value})}}
                                 style={styles.pickerStyle}
                             >
+                                {/* <Picker.Item value={0} label="Select" /> */}
                                 {categoryPicker}
-                                {/* <Picker.Item label="Entree" value="Entree" />
-                                <Picker.Item label="Main" value="Main" />
-                                <Picker.Item label="Side" value="Side" />
-                                <Picker.Item label="Dessert" value="Dessert" />
-                                <Picker.Item label="Beverage" value="Beverage" /> */}
                             </Picker>
                             <Text style={styles.formLabel}>Price</Text>
                             <TextInput
@@ -483,9 +463,8 @@ class MenuScreen extends Component {
                                 onValueChange = {(value) => {this.setState({availability: value})}}
                                 style={styles.pickerStyle}
                             >
-                                <Picker.Item label="Pick Status" value="0" />
-                                <Picker.Item label="Available" value="Available" />
-                                <Picker.Item label="Unavailable" value="Unavailable" />
+                                <Picker.Item label="Available" value={true} />
+                                <Picker.Item label="Unavailable" value={false} />
                             </Picker>
                         </View>
                     </ScrollView>
@@ -541,11 +520,6 @@ class MenuScreen extends Component {
                                 style={styles.pickerStyle}
                             >
                                 {categoryPicker}
-                                {/* <Picker.Item label="Entree" value="Entree" />
-                                <Picker.Item label="Main" value="Main" />
-                                <Picker.Item label="Side" value="Side" />
-                                <Picker.Item label="Dessert" value="Dessert" />
-                                <Picker.Item label="Beverage" value="Beverage" /> */}
                             </Picker>
                             <Text style={styles.formLabel}>Price</Text>
                             <TextInput
@@ -569,9 +543,9 @@ class MenuScreen extends Component {
                                 onValueChange = {(value) => {this.setState({availability: value})}}
                                 style={styles.pickerStyle}
                             >
-                                <Picker.Item label="Choose" value="0" />
-                                <Picker.Item label="Available" value="Available" />
-                                <Picker.Item label="Unavailable" value="Unavailable" />
+
+                                <Picker.Item label="Available" value={true} />
+                                <Picker.Item label="Unavailable" value={false} />
                             </Picker>
                         </View>                            
                     </ScrollView>

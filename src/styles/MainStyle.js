@@ -34,6 +34,26 @@ export default StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    btnSmallSearch: {
+        backgroundColor: Colours.beanDarkBlue,
+        marginHorizontal: 7,
+        marginBottom: 10,
+        height: 50,
+        borderRadius: 5,
+        width: '10%',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    btnMediumDanger: {
+        backgroundColor: Colours.beanMidBlue,
+        marginHorizontal: 10,
+        marginVertical: 5,
+        height: 50,
+        borderRadius: 5,
+        width: '30%',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     btnLargeContainer: {
         width: '90%',
         height: 50,
@@ -76,7 +96,7 @@ export default StyleSheet.create({
     header: {
         backgroundColor: Colours.white,
         borderBottomColor: Colours.beanDarkBlue,
-        borderBottomWidth: '3px'
+        borderBottomWidth: '2px'
     },
     headerTitle: {
         color: Colours.beanDarkBlue,
@@ -92,6 +112,20 @@ export default StyleSheet.create({
     formLabel: {
         fontSize: 20,
         fontWeight: 'bold',
+    },
+
+    // LOGOUT HEADER
+    headerContainer: {
+        width: '100%',
+        height: '5%',
+        backgroundColor:Colours.beanMidBlue,
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+        paddingHorizontal: '1%'
+    },
+    headerText :{
+        fontWeight: 'bold',
+        color: Colours.white
     },
     // INPUT FIELDS
     inputTextbox: {
@@ -129,8 +163,8 @@ export default StyleSheet.create({
     },
     listContainerMenu: {
         // flex: 1,
-        margin: '2%',
-        padding: '3%',
+        margin: '1%',
+        padding: '2%',
         flexDirection: 'column',
         justifyContent: 'space-between',
         backgroundColor: Colours.white,
@@ -172,9 +206,11 @@ export default StyleSheet.create({
     searchContainer: {
         margin: 'auto',
         marginTop: '2%',
-        width: '90%'
+        flexDirection: 'row',
+        width: '90%',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-
     categorySearchBtn: {
         backgroundColor: Colours.white,
         borderColor: Colours.beanMidBlue, 
@@ -183,7 +219,7 @@ export default StyleSheet.create({
         marginHorizontal: 5,
         height: 35,
         borderRadius: 10,
-        width: '30%',
+        width: '50%',
         alignItems: 'center',
         justifyContent: 'center',
     },

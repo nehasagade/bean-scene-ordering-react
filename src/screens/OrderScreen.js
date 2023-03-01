@@ -1,9 +1,10 @@
 import { Component } from "react";
 import { SafeAreaView } from "react-native";
-import { View, Pressable, Text, ScrollView, FlatList, Picker, TextInput } from "react-native-web";
+import { View, Pressable, Text, ScrollView, FlatList, Picker, TextInput } from "react-native";
 
 import Colours from "../constants/Colours";
 import styles from '../styles/MainStyle';
+import Header from "../constants/Header";
 
 class OrderScreen extends Component {
     constructor(){
@@ -14,7 +15,7 @@ class OrderScreen extends Component {
             oneOrder: {},
             selectedMenuItem: {
                 menu: {
-                    menu_id: '',
+                    _id: '',
                     name: '',
                     description: '',
                     price: 0,
@@ -24,25 +25,28 @@ class OrderScreen extends Component {
                 note: ''
             },
             order: {
+                _id:'',
                 table_id: '',
                 order_items: [],
                 is_complete: false
             },
             selectedTab: 'get',
-            message: ''
+            message: '',
+            allCategories: []
         }     
     }
     
     
     componentDidMount(){
-        this.getOrder()    
+        this.getOrder()
+        this.getCategory()    
     }
     addItemToOrder() {
         this.setState(prevState => ({
             ...prevState.order.order_items.push(prevState.selectedMenuItem),
             selectedMenuItem: {
                 menu: {
-                    menu_id: '',
+                    _id: '',
                     name: '',
                     description: '',
                     price: 0,
@@ -57,7 +61,7 @@ class OrderScreen extends Component {
     }
     // Mark order completed
     completeOrder() {
-        var url = 'http://localhost:57431/api/Order/Complete/' + this.state.oneOrder.order_id
+        var url = 'http://localhost:57431/api/Order/Complete/' + this.state.oneOrder._id
         var options = {
             method: 'PUT',
             headers: {
@@ -75,6 +79,7 @@ class OrderScreen extends Component {
             })
         }) 
     }
+    // Add order
     createOrder() {
         var url = 'http://localhost:57431/api/Order/Create'
         
@@ -135,7 +140,71 @@ class OrderScreen extends Component {
             });
     }    
     
+    // Get categories for pickers
+    getCategory() {
+        var options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization : 'Basic ' + btoa('test:test')
+            }
+        }
+        fetch('http://localhost:57431/api/Category', options)
+            .then((response) => {
+                if(response.ok)
+                {
+                    return response.json()
+                }
+                else {
+                    this.setState({
+                        message: 'Something went wrong. Try again later'
+                    })
+                        
+                }
+            })
+            .then((json) => {
+                console.log(json);
+                this.setState({
+                    allCategories: json,
+                    selectedTab: 'get'
+                })
+                
+            });
+    }
+
+    searchCategory=(category)=>{
+        var url = 'http://localhost:57431/api/Menu/SearchCategory/' + category._id
+        var options = {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization : 'Basic ' + btoa('test:test')
+            }
+        }
+        fetch(url, options)
+        .then(response =>response.json())
+        .then((json)=>{
+            console.log(json);
+
+            this.setState({
+                menuData:json
+            })
+        })
+    }
+
     render() {
+        let categorySearchBtns = this.state.allCategories.map((category) => {
+            return <Pressable
+                        key={category._id} 
+                        style={styles.categorySearchBtn}
+                        onPress={() => this.searchCategory(category)}
+                    >
+            <Text style={styles.categorySearchBtnText}>{category.name}</Text>
+        </Pressable>
+        })
+
         // GET ALL
         if(this.state.selectedTab == 'get') {
             const renderData=({item})=>{
@@ -162,11 +231,18 @@ class OrderScreen extends Component {
             }
             return(
                 <SafeAreaView style={styles.container}>
+                    <Header navigation={this.props.navigation}></Header>
                     <View style={styles.btnLargeContainer}>
                         <Pressable 
                             style={styles.btnLarge}
                             onPress={()=> this.setState({
-                                selectedTab: 'add'
+                                selectedTab: 'add',
+                                order: {
+                                    table_id: '',
+                                    order_items: [],
+                                    is_complete: false
+                                },
+
                             })}
                         >
                             <Text style={styles.btnText}>New</Text>
@@ -213,7 +289,7 @@ class OrderScreen extends Component {
                     <FlatList 
                         data={this.state.oneOrder.order_items} 
                         renderItem={renderData} 
-                        keyExtractor={(item)=>item.menu.menu_id} 
+                        keyExtractor={(item)=>item.menu._id} 
                     /> 
                     <View style={styles.btnLargeContainer}>
                         <Pressable 
@@ -282,7 +358,7 @@ class OrderScreen extends Component {
                     <FlatList 
                         data={this.state.order.order_items} 
                         renderItem={renderData} 
-                        keyExtractor={(item)=>item.menu.menu_id} 
+                        keyExtractor={(item)=>item.menu._id} 
                     />
                     <View style={styles.btnLargeContainer}>
                        
@@ -300,7 +376,7 @@ class OrderScreen extends Component {
                                 selectedTab: 'addItem',
                                 selectedMenuItem: {
                                     menu: {
-                                        menu_id: item.menu_id,
+                                        _id: item._id,
                                         name: item.name,
                                         description: item.description,
                                         price: item.price,
@@ -336,16 +412,40 @@ class OrderScreen extends Component {
                             <Text style={styles.btnText}>Back</Text>
                         </Pressable>
                     </View>
+                    <View style={styles.searchContainer}>
+                        <TextInput
+                            placeholder='Search'
+                            value={this.state.searchText}
+                            placeholderTextColor={Colours.beanDarkBlue}
+                            style={styles.inputTextbox} 
+                            onChangeText={text => this.search(text)} 
+                        />                       
+                    </View>
+                    <View style={styles.searchContainer}>
+                        <ScrollView 
+                            horizontal={true} 
+                            showsHorizontalScrollIndicator={false} 
+                        >
+                             <Pressable 
+                                style={styles.categorySearchBtn}
+                                onPress={() => this.getAvailableMenu()}
+                            >
+                                <Text style={styles.categorySearchBtnText}>All</Text>
+                            </Pressable>
+                            {categorySearchBtns}
+                        </ScrollView>
+                    </View>
                     <FlatList 
                         data={this.state.menuData} 
                         renderItem={renderData} 
-                        keyExtractor={(item)=>item.menu_id} 
+                        keyExtractor={(item)=>item._id} 
                     />            
                 </SafeAreaView>
             );
         }
         // ADD ITEM TO ORDER
         else if(this.state.selectedTab == 'addItem') {
+            
             return(
                 <SafeAreaView style={styles.container}>
                     <ScrollView>
@@ -359,6 +459,7 @@ class OrderScreen extends Component {
                                 <Text style={styles.btnText}>Back</Text>
                             </Pressable>
                         </View>
+                        
                        <View style={styles.listContainerMenu}>
                             <Text style={styles.listHeading}>{this.state.selectedMenuItem.menu.name}</Text>
                             <Text style={styles.listText}>{this.state.selectedMenuItem.menu.description}</Text>

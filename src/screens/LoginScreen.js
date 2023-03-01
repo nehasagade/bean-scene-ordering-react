@@ -1,6 +1,6 @@
 import { Component } from "react";
 import { SafeAreaView, Image, Text, TextInput, Pressable } from "react-native";
-import { View } from "react-native-web";
+import { View } from "react-native";
 
 import Colours from "../constants/Colours";
 import styles from "../styles/MainStyle";
@@ -18,7 +18,6 @@ class LoginScreen extends Component {
             error: ''
         }
     }
-
     onUsernameChange=(e)=>{
         this.setState({
             username: e
@@ -40,6 +39,7 @@ class LoginScreen extends Component {
             this.setState({
                 error: ''
             })
+            // In the real world this would not be done!!
             var url = 'http://localhost:57431/api/Staff/' + this.state.username + '/' + this.state.password
             var headers = new Headers({                
                 Authorization : 'Basic ' + btoa('test:test')
@@ -57,7 +57,9 @@ class LoginScreen extends Component {
                     }
                     else {
                         this.setState({
-                            data: json
+                            data: json,
+                            username: '',
+                            password: ''
                         })
                         const jsonValue = JSON.stringify(this.state.data)
                         AsyncStorage.setItem('@loginDetails', jsonValue)

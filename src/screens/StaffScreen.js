@@ -1,9 +1,10 @@
 import { Component } from "react";
 import { SafeAreaView } from "react-native";
-import { View, Pressable, ScrollView, FlatList, Text, TextInput, Picker } from "react-native-web";
+import { View, Pressable, ScrollView, FlatList, Text, TextInput, Picker } from "react-native";
 
 import styles from '../styles/MainStyle';
 import Colours from "../constants/Colours";
+import Header from "../constants/Header";
 
 class StaffScreen extends Component {
     constructor(){
@@ -16,7 +17,7 @@ class StaffScreen extends Component {
             email: '',
             phone: '',
             position: '',
-            password: '',
+            staffPassword: '',
             message: '',
             selectedTab: 'get',
         }
@@ -35,7 +36,7 @@ class StaffScreen extends Component {
             email: this.state.email,
             phone: this.state.phone,
             position: this.state.position,
-            password: this.state.password
+            password: this.state.staffPassword
         };
 
         var options = {
@@ -87,7 +88,7 @@ class StaffScreen extends Component {
             email: this.state.email,
             phone: this.state.phone,
             position: this.state.position,
-            password: this.state.password
+            password: this.state.staffPassword
         };
         var options = {
             method: 'PUT',
@@ -149,6 +150,7 @@ class StaffScreen extends Component {
             }
             return(
                 <SafeAreaView style={styles.container}>
+                    <Header navigation={this.props.navigation}></Header>
                     <View style={styles.btnLargeContainer}>
                         <Pressable 
                             style={styles.btnLarge}
@@ -160,6 +162,7 @@ class StaffScreen extends Component {
                                 email: '',
                                 phone: '',
                                 position: '',
+                                staffPassword: '',
                                 message: ''
                             })}
                         >
@@ -199,7 +202,7 @@ class StaffScreen extends Component {
                             <Text style={styles.btnText}>Edit</Text>
                         </Pressable>
                         <Pressable 
-                            style={styles.btnMedium}
+                            style={styles.btnMediumDanger}
                             onPress={() => this.deleteStaff()}    
                         >
                             <Text style={styles.btnText}>Delete</Text>
@@ -319,10 +322,11 @@ class StaffScreen extends Component {
                             <Text style={styles.formLabel}>Password</Text>
                             <TextInput
                                 placeholder='Enter new password'
-                                value={this.state.password}
+                                value={this.state.staffPassword}
+                                secureTextEntry={true} 
                                 placeholderTextColor={Colours.beanDarkBlue}
                                 style={styles.inputTextbox}
-                                onChangeText={text => this.setState({password: text})}  
+                                onChangeText={text => this.setState({staffPassword: text})}  
                             />
                             <Text style={styles.formLabel}>Position</Text>                           
                             <Picker
@@ -396,10 +400,11 @@ class StaffScreen extends Component {
                             <Text style={styles.formLabel}>Password</Text>
                             <TextInput
                                 placeholder='Password'
-                                value={this.state.password}
+                                value={this.state.staffPassword}
+                                secureTextEntry={true} 
                                 placeholderTextColor={Colours.beanMidBlue}
                                 style={styles.inputTextbox}
-                                onChangeText={text => this.setState({password: text})}  
+                                onChangeText={text => this.setState({staffPassword: text})}  
                             />
                             <Text style={styles.formLabel}>Position</Text>
                             <Picker
